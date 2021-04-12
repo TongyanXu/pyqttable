@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['ColumnType', 'DateColumnType', 'TimeColumnType', 'DateTimeColumnType']
+__all__ = ['ColumnType', 'DateColumnType', 'TimeColumnType', 'DateTimeColumnType', 'basic_column_type']
 
 import abc
 import datetime as dt
 
-from pyqttable.column.default import ValueFetcher
+from .default import ValueFetcher
+
 from pyqttable.editor import *
+
+basic_column_type = [int, float, str, bool]
 
 
 class ColumnType(metaclass=abc.ABCMeta):
@@ -18,7 +21,7 @@ class ColumnType(metaclass=abc.ABCMeta):
         klass = fetcher.get('type')
         if isinstance(klass, cls):
             return klass
-        elif klass in [int, float, str, bool]:
+        elif klass in basic_column_type:
             return BasicColumnType.from_type(klass)
         elif klass in [dt.datetime, dt.date, dt.time]:
             return DateTimeColumnType.from_type(klass)

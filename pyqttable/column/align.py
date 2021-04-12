@@ -4,7 +4,7 @@
 __all__ = ['Alignment']
 
 from PyQt5 import QtCore, QtWidgets
-from pyqttable.column.default import ValueFetcher
+from .default import ValueFetcher
 
 _horizontal_flag = {
     'l':        QtCore.Qt.AlignLeft,

@@ -11,7 +11,7 @@ class _DefaultColumn:
     h_align = 'l'
     v_align = 'c'
     selection = None
-    sorting_proxy = None
+    sort_lt = None
     filter_type = 'contain'
 
 

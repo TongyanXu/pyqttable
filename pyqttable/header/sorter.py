@@ -10,15 +10,15 @@ from pyqttable.column import *
 from typing import NoReturn
 
 _next_status = {
-    sort_proxy.SortStatus.Nothing: sort_proxy.SortStatus.Ascending,
-    sort_proxy.SortStatus.Ascending: sort_proxy.SortStatus.Descending,
-    sort_proxy.SortStatus.Descending: sort_proxy.SortStatus.Nothing,
+    sorter.SortStatus.Nothing: sorter.SortStatus.Ascending,
+    sorter.SortStatus.Ascending: sorter.SortStatus.Descending,
+    sorter.SortStatus.Descending: sorter.SortStatus.Nothing,
 }
 
 _sort_indicator = {
-    sort_proxy.SortStatus.Nothing: None,
-    sort_proxy.SortStatus.Ascending: QtCore.Qt.AscendingOrder,
-    sort_proxy.SortStatus.Descending: QtCore.Qt.DescendingOrder,
+    sorter.SortStatus.Nothing: None,
+    sorter.SortStatus.Ascending: QtCore.Qt.AscendingOrder,
+    sorter.SortStatus.Descending: QtCore.Qt.DescendingOrder,
 }
 
 
@@ -27,7 +27,7 @@ class SortableHeaderItem(QtWidgets.QTableWidgetItem):
     def __init__(self, column: Column):
         self.column_cfg = column
         super().__init__(self.column_cfg.name)
-        self.status = sort_proxy.SortStatus.Nothing
+        self.status = sorter.SortStatus.Nothing
 
     @property
     def indicator(self) -> QtCore.Qt.SortOrder:
@@ -37,11 +37,10 @@ class SortableHeaderItem(QtWidgets.QTableWidgetItem):
         self.status = _next_status[self.status]
 
     def reset_status(self) -> NoReturn:
-        self.status = sort_proxy.SortStatus.Nothing
+        self.status = sorter.SortStatus.Nothing
 
     def sort(self, df: pd.DataFrame) -> pd.DataFrame:
-        proxy = self.column_cfg.sorting_proxy
-        return proxy.sort_data(
+        return self.column_cfg.sorter.sort_data(
             df=df,
             by=self.column_cfg.key,
             status=self.status,

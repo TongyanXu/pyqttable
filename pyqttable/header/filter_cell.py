@@ -36,7 +36,12 @@ class FilterManager(QtCore.QObject):
         for column, factory, cell in self._filter_cell:
             value = factory.get_data(cell)
             if value:
-                df = column.filter.filter(df, column.key, value, column.type.to_string)
+                df = column.filter.filter(
+                    df=df, by=column.key,
+                    filter_value=value,
+                    to_string=column.type.to_string,
+                    to_value=column.type.to_value,
+                 )
         return df
 
 

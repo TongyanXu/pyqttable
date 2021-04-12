@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['SortStatus', 'SortingProxy']
+__all__ = ['SortStatus', 'Sorter']
 
 import enum
 import pandas as pd
 
-from pyqttable.column.default import ValueFetcher
+from .default import ValueFetcher
 from typing import Optional
 
 
@@ -16,23 +16,35 @@ class SortStatus(enum.Enum):
     Descending = 2
 
 
-class SortingProxy:
+class SortProxy:
 
-    def __init__(self, sorting_proxy: Optional[callable]):
-        self.sorting_proxy = sorting_proxy
-        self._make_proxy = self.sorting_proxy is not None
+    def __init__(self, value, lt):
+        self.value = value
+        self._lt = lt
+
+    @classmethod
+    def create(cls, value, lt):
+        return cls(value, lt)
+
+    def __lt__(self, other):
+        return self._lt(self.value, other.value)
+
+
+class Sorter:
+
+    def __init__(self, sort_lt: Optional[callable]):
+        self.sort_lt = sort_lt
 
     @classmethod
     def make(cls, fetcher: ValueFetcher):
-        return cls(
-            sorting_proxy=fetcher.get('sorting_proxy'),
-        )
+        return cls(fetcher.get('sort_lt'))
 
     def sort_data(self, df: pd.DataFrame, by: str, status: SortStatus):
-        if self._make_proxy:
-            proxy = df[by].apply(self.sorting_proxy)
+        df = df.copy()
+
+        if self.sort_lt is not None:
+            proxy = df[by].apply(SortProxy.create, lt=self.sort_lt)
             by = f'{by}_sorting_proxy'
-            df = df.copy()
             df[by] = proxy
 
         if status == SortStatus.Ascending:
@@ -42,7 +54,7 @@ class SortingProxy:
         else:
             res = df.sort_index()
 
-        if self._make_proxy:
+        if self.sort_lt is not None:
             res.drop(by, axis=1, inplace=True)
 
         return res
