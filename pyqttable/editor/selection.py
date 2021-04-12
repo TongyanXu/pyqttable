@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['SelectionEditorFactory', 'BoolEditorFactory']
+__all__ = ['BoolEditorFactory', 'SingleChoiceEditorFactory', 'MultiChoiceEditorFactory']
 
 from .base import EditorFactory
+from .check_box import CheckableComboBox
 
 from PyQt5 import QtWidgets, QtCore
 from typing import List, NoReturn
 
 
-class SelectionEditorFactory(EditorFactory):
+class SingleChoiceEditorFactory(EditorFactory):
     klass = QtWidgets.QComboBox
 
     def __init__(self, selection: List[str]):
         self.selection = selection
 
     def create(self, parent: QtWidgets.QWidget = None) -> klass:
-        editor = QtWidgets.QComboBox(parent)
+        editor = self.klass(parent)
         editor.addItems(self.selection)
         return editor
 
@@ -32,10 +33,26 @@ class SelectionEditorFactory(EditorFactory):
         return editor.currentIndexChanged
 
 
-class BoolEditorFactory(SelectionEditorFactory):
+class BoolEditorFactory(SingleChoiceEditorFactory):
 
     def __init__(self):
         super().__init__(['True', 'False'])
+
+
+class MultiChoiceEditorFactory(SingleChoiceEditorFactory):
+    klass = CheckableComboBox
+
+    def set_data(self, editor: klass, data: list) -> NoReturn:
+        if not isinstance(data, list):
+            data = [data]
+        editor.setCurrentData(data)
+        editor.showPopup()
+
+    def get_data(self, editor: klass) -> list:
+        return editor.currentData()
+
+    def done_signal(self, editor: klass) -> QtCore.pyqtSignal:
+        return editor.editTextChanged
 
 
 if __name__ == '__main__':

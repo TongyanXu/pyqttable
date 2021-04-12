@@ -20,7 +20,7 @@ class DelegateSetter:
     @staticmethod
     def get_editor_factory(column: Column) -> Optional[EditorFactory]:
         if column.selection:
-            return SelectionEditorFactory(column.selection)
+            return SingleChoiceEditorFactory(column.selection)
         if column.type.editor_factory is not None:
             return column.type.editor_factory
         return None
