@@ -13,6 +13,8 @@ class _DefaultColumn:
     selection = None
     sort_lt = None
     filter_type = 'contain'
+    color = None
+    bg_color = None
 
 
 class ValueFetcher:

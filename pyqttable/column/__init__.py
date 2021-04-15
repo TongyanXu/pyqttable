@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['Column', 'align', 'default', 'sorter', 'type_', 'filter']
+__all__ = ['Column', 'align', 'default', 'sorter', 'type_', 'filter', 'style']
 
 from dataclasses import dataclass
 from typing import Any, Optional, List
 
-from . import align
-from . import default
-from . import sorter
-from . import type as type_
-from . import filter
+from . import align, default, sorter, type as type_, filter, style
 
 
 @dataclass()
@@ -24,6 +20,7 @@ class Column:
     selection: Optional[List]
     sorter: sorter.Sorter
     filter: filter.Filter
+    style: style.Style
 
     @classmethod
     def from_cfg(cls, cfg):
@@ -38,6 +35,7 @@ class Column:
             selection=fetcher.get('selection'),
             sorter=sorter.Sorter.make(fetcher),
             filter=filter.Filter.make(fetcher),
+            style=style.Style.make(fetcher),
         )
 
     def to_cfg(self):
@@ -52,6 +50,8 @@ class Column:
             selection=self.selection,
             sort_lt=self.sorter.sort_lt,
             filter_type=self.filter.type,
+            color=self.style.color,
+            bg_color=self.style.bg_color,
         )
 
 

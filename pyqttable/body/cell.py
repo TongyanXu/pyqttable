@@ -17,6 +17,7 @@ class TableCell(QtWidgets.QTableWidgetItem):
         display_value = self.column_cfg.type.to_string(value)
         super().__init__(display_value)
         self.column_cfg.align.apply_to_item(self)
+        self.column_cfg.style.apply_to_item(self)
 
     @classmethod
     def from_row(cls, row_data: pd.Series, column: Column):
