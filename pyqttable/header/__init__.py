@@ -3,11 +3,13 @@
 
 __all__ = ['TableHeader']
 
+import pandas as pd
+
 from .filter_cell import *
 from .sorter import *
 
 from PyQt5 import QtWidgets, QtCore
-from pyqttable.column import Column
+from pyqttable.column import Column, filter
 from typing import List, NoReturn
 
 
@@ -43,7 +45,7 @@ class TableHeader(QtWidgets.QTableWidget):
         if self.show_filter:
             self.setRowCount(1)
             for j, col in enumerate(self.columns):
-                cell = self._filter.cell(col)
+                cell = self._filter.editor(col)
                 self.setCellWidget(0, j, cell)
             self._filter.filterUpdated.connect(self._on_filter)
 
@@ -59,6 +61,17 @@ class TableHeader(QtWidgets.QTableWidget):
 
     def _on_filter(self) -> NoReturn:
         self.filterTriggered.emit(self._filter.filter)
+
+    def update_filter(self, df: pd.DataFrame) -> NoReturn:
+        header = self.horizontalHeader()
+        for j in range(header.count()):
+            item = self.horizontalHeaderItem(j)
+            # column = item.column_cfg
+            # if column.filter.type == filter.FilterType.MultipleChoice:
+            #     cell = self.cellWidget(0, j)
+            #     cell.clear()
+            #     cell.addItems(df[column.key].unique().tolist())
+            self._filter.update_editor(item.column_cfg, df)
 
 
 if __name__ == '__main__':

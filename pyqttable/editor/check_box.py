@@ -102,9 +102,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
         item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
         self.model().appendRow(item)
 
-    # def addItems(self, texts, p_str=None) -> NoReturn:
-    #     for i, text in enumerate(texts):
-    #         self.addItem(text, None)
+    def addItems(self, texts, p_str=None) -> NoReturn:
+        for i, text in enumerate(texts):
+            self.addItem(text, None)
 
     def setCurrentData(self, data: List[str]) -> NoReturn:
         for i in range(self.model().rowCount()):

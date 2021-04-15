@@ -70,6 +70,7 @@ class PyQtTable(QtWidgets.QWidget):
 
     def set_data(self, data: List[Dict[str, Any]]) -> NoReturn:
         self._data = self._shown_data = pd.DataFrame(data)
+        self._thead.update_filter(self._data)
         self._display_data()
 
     def _display_data(self) -> NoReturn:

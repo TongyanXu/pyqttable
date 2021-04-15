@@ -54,6 +54,12 @@ class MultiChoiceEditorFactory(SingleChoiceEditorFactory):
     def done_signal(self, editor: klass) -> QtCore.pyqtSignal:
         return editor.editTextChanged
 
+    @staticmethod
+    def reset_editor(editor: klass, data: list) -> NoReturn:
+        model = editor.model()
+        model.removeRows(0, model.rowCount())
+        editor.addItems(data)
+
 
 if __name__ == '__main__':
     pass
