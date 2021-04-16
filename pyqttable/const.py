@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""self defined widget"""
+"""constants"""
 
-from .combo_check_box import *
+DefaultDelimiter = ','
 
 
 if __name__ == '__main__':

@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""ComboBox with CheckBox on each row to support multi-selection"""
 
 __all__ = ['ComboCheckBox']
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+from pyqttable import const
 from typing import List, NoReturn
 
 
 class ComboCheckBox(QtWidgets.QComboBox):
+    """ComboBox with CheckBox on each row to support multi-selection"""
+
+    Delimiter = const.DefaultDelimiter
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -77,7 +81,11 @@ class ComboCheckBox(QtWidgets.QComboBox):
 
     @classmethod
     def data_to_text(cls, data: List[str]) -> str:
-        return ', '.join(data)
+        return cls.Delimiter.join(data)
+
+    @classmethod
+    def text_to_data(cls, data: str) -> List[str]:
+        return data.split(cls.Delimiter)
 
     def update_text(self) -> NoReturn:
         texts = []
@@ -107,6 +115,7 @@ class ComboCheckBox(QtWidgets.QComboBox):
             self.addItem(text, None)
 
     def setCurrentData(self, data: List[str]) -> NoReturn:
+        # Select the list of items according to given list data
         for i in range(self.model().rowCount()):
             if self.model().item(i).data() in data:
                 self.model().item(i).setCheckState(QtCore.Qt.Checked)

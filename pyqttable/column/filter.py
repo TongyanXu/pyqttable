@@ -10,7 +10,7 @@ import re
 
 from .default import ValueFetcher
 from .type import basic_column_type
-
+from pyqttable import const
 from typing import List, Optional, Any
 
 
@@ -142,12 +142,14 @@ class ExpressionFilter(Filter):
 
 class MultipleChoice(Filter):
     PlaceHolderText = 'Multi'
+    Delimiter = const.DefaultDelimiter
 
-    def filter_each(self, content: str, filter_value: List[str],
+    def filter_each(self, content: str, filter_value: str,
                     to_string: Optional[callable],
                     to_value: Optional[callable]) -> bool:
-        if isinstance(filter_value, list):
-            return content in filter_value
+        if isinstance(filter_value, str):
+            filter_list = filter_value.split(self.Delimiter)
+            return content in filter_list
         else:
             return False
 

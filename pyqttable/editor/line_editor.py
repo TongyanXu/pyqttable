@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""text related simple editor factory"""
 
 __all__ = ['LineEditorFactory']
 
@@ -10,6 +10,8 @@ from typing import NoReturn
 
 
 class LineEditorFactory(EditorFactory):
+    """Factory of QLineEdit for string / integer / float and other basic data"""
+
     klass = QtWidgets.QLineEdit
 
     def create(self, parent: QtWidgets.QWidget = None) -> klass:

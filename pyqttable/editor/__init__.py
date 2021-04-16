@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""editor factories for table cells and filter cells"""
 
 from .base import *
 from .dt_editor import *

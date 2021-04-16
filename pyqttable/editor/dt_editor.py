@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""datetime related editor factory"""
 
 __all__ = ['DateTimeEditorFactory', 'DateEditorFactory', 'TimeEditorFactory']
 
@@ -12,6 +12,8 @@ from typing import NoReturn
 
 
 class DateTimeEditorFactory(EditorFactory):
+    """Factory of QDataTimeEdit for datetime.datetime"""
+
     klass = QtWidgets.QDateTimeEdit
 
     def __init__(self, value_format: str, display_format: str):
@@ -41,6 +43,8 @@ class DateTimeEditorFactory(EditorFactory):
 
 
 class DateEditorFactory(DateTimeEditorFactory):
+    """Factory of QDataEdit for datetime.date"""
+
     klass = QtWidgets.QDateEdit
 
     def set_data(self, editor: klass, data: str) -> NoReturn:
@@ -54,6 +58,8 @@ class DateEditorFactory(DateTimeEditorFactory):
 
 
 class TimeEditorFactory(DateTimeEditorFactory):
+    """Factory of QTimeEdit for datetime.time"""
+
     klass = QtWidgets.QTimeEdit
 
     def set_data(self, editor: klass, data: str) -> NoReturn:
