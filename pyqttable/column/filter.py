@@ -23,6 +23,7 @@ class FilterType(enum.Enum):
 
 
 class Filter(metaclass=abc.ABCMeta):
+    PlaceHolderText = ''
 
     def __init__(self, filter_type):
         self.type = filter_type
@@ -30,6 +31,8 @@ class Filter(metaclass=abc.ABCMeta):
     @classmethod
     def make(cls, fetcher: ValueFetcher):
         filter_type = fetcher.get('filter_type')
+        if isinstance(filter_type, cls):
+            return filter_type
         try:
             filter_type = FilterType(filter_type)
         except Exception as e:
@@ -81,6 +84,7 @@ class Filter(metaclass=abc.ABCMeta):
 
 
 class ExactFilter(Filter):
+    PlaceHolderText = 'Exact'
 
     def filter_each(self, content: Any, filter_value: Any,
                     to_string: Optional[callable],
@@ -92,6 +96,7 @@ class ExactFilter(Filter):
 
 
 class ContainFilter(Filter):
+    PlaceHolderText = 'Contain'
 
     def filter_each(self, content: Any, filter_value: Any,
                     to_string: Optional[callable],
@@ -103,6 +108,7 @@ class ContainFilter(Filter):
 
 
 class RegexFilter(Filter):
+    PlaceHolderText = 'Regex'
 
     def filter_each(self, content: Any, filter_value: Any,
                     to_string: Optional[callable],
@@ -114,6 +120,7 @@ class RegexFilter(Filter):
 
 
 class ExpressionFilter(Filter):
+    PlaceHolderText = 'Express'
 
     def filter_each(self, content: Any, filter_value: Any,
                     to_string: Optional[callable],
@@ -134,6 +141,7 @@ class ExpressionFilter(Filter):
 
 
 class MultipleChoice(Filter):
+    PlaceHolderText = 'Multi'
 
     def filter_each(self, content: str, filter_value: List[str],
                     to_string: Optional[callable],

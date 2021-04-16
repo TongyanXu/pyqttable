@@ -9,7 +9,7 @@ from .filter_cell import *
 from .sorter import *
 
 from PyQt5 import QtWidgets, QtCore
-from pyqttable.column import Column, filter
+from pyqttable.column import Column
 from typing import List, NoReturn
 
 
@@ -66,11 +66,6 @@ class TableHeader(QtWidgets.QTableWidget):
         header = self.horizontalHeader()
         for j in range(header.count()):
             item = self.horizontalHeaderItem(j)
-            # column = item.column_cfg
-            # if column.filter.type == filter.FilterType.MultipleChoice:
-            #     cell = self.cellWidget(0, j)
-            #     cell.clear()
-            #     cell.addItems(df[column.key].unique().tolist())
             self._filter.update_editor(item.column_cfg, df)
 
 

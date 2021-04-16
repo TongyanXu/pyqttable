@@ -28,6 +28,11 @@ class EditorFactory(metaclass=abc.ABCMeta):
     def done_signal(self, editor: klass) -> QtCore.pyqtSignal:
         ...
 
+    @staticmethod
+    @abc.abstractmethod
+    def set_place_holder(editor: klass, text: str) -> NoReturn:
+        ...
+
 
 if __name__ == '__main__':
     pass

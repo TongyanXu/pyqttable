@@ -52,10 +52,6 @@ class PyQtTable(QtWidgets.QWidget):
         self._tbody.setContentsMargins(0, 0, 0, 0)
 
     def _setup_components(self) -> NoReturn:
-
-        # delegate = BoolDelegate(self, self.columns[3])
-        # self._tbody.setItemDelegateForColumn(3, delegate)
-
         self._thead.sortingTriggered.connect(self._sorting_action)
         self._thead.filterTriggered.connect(self._filter_action)
         self._tbody.dataEdited.connect(self._update_data)

@@ -35,6 +35,10 @@ class DateTimeEditorFactory(EditorFactory):
     def done_signal(self, editor: klass) -> QtCore.pyqtSignal:
         return editor.editingFinished
 
+    @staticmethod
+    def set_place_holder(editor: klass, text: str) -> NoReturn:
+        editor.lineEdit().setPlaceholderText(text)
+
 
 class DateEditorFactory(DateTimeEditorFactory):
     klass = QtWidgets.QDateEdit

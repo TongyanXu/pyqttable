@@ -25,6 +25,10 @@ class LineEditorFactory(EditorFactory):
     def done_signal(self, editor: klass) -> QtCore.pyqtSignal:
         return editor.editingFinished
 
+    @staticmethod
+    def set_place_holder(editor: klass, text: str) -> NoReturn:
+        editor.setPlaceholderText(text)
+
 
 if __name__ == '__main__':
     pass

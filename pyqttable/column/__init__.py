@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['Column', 'align', 'default', 'sorter', 'type_', 'filter', 'style']
+__all__ = ['Column', 'align', 'default', 'sorter', 'type_', 'filter_', 'style']
 
 from dataclasses import dataclass
 from typing import Any, Optional, List
 
-from . import align, default, sorter, type as type_, filter, style
+from . import align, default, sorter, type as type_, filter as filter_, style
 
 
 @dataclass()

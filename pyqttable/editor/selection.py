@@ -4,9 +4,9 @@
 __all__ = ['BoolEditorFactory', 'SingleChoiceEditorFactory', 'MultiChoiceEditorFactory']
 
 from .base import EditorFactory
-from .check_box import CheckableComboBox
 
 from PyQt5 import QtWidgets, QtCore
+from pyqttable.widget import ComboCheckBox
 from typing import List, NoReturn
 
 
@@ -32,6 +32,10 @@ class SingleChoiceEditorFactory(EditorFactory):
     def done_signal(self, editor: klass) -> QtCore.pyqtSignal:
         return editor.currentIndexChanged
 
+    @staticmethod
+    def set_place_holder(editor: klass, text: str) -> NoReturn:
+        editor.lineEdit().setPlaceholderText(text)
+
 
 class BoolEditorFactory(SingleChoiceEditorFactory):
 
@@ -40,7 +44,7 @@ class BoolEditorFactory(SingleChoiceEditorFactory):
 
 
 class MultiChoiceEditorFactory(SingleChoiceEditorFactory):
-    klass = CheckableComboBox
+    klass = ComboCheckBox
 
     def set_data(self, editor: klass, data: list) -> NoReturn:
         if not isinstance(data, list):

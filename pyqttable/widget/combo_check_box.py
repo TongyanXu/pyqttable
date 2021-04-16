@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['CheckableComboBox']
+__all__ = ['ComboCheckBox']
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from typing import List, NoReturn
 
 
-class CheckableComboBox(QtWidgets.QComboBox):
+class ComboCheckBox(QtWidgets.QComboBox):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,10 +15,10 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # Make the combo editable to set a custom text, but readonly
         self.setEditable(True)
         self.lineEdit().setReadOnly(True)
-        # Make the lineedit the same color as QPushButton
-        palette = QtGui.QPalette()
-        palette.setBrush(QtGui.QPalette.Base, palette.button())
-        self.lineEdit().setPalette(palette)
+        # # Make the lineEdit the same color as QPushButton
+        # palette = QtGui.QPalette()
+        # palette.setBrush(QtGui.QPalette.Base, palette.button())
+        # self.lineEdit().setPalette(palette)
 
         # Update the text when an item is toggled
         self.model().dataChanged.connect(self.update_text)

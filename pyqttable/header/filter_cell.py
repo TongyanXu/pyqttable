@@ -8,7 +8,7 @@ import pandas as pd
 from PyQt5 import QtWidgets, QtCore
 from pyqttable.column import *
 from pyqttable.editor import *
-from typing import NoReturn, Optional
+from typing import NoReturn
 
 
 class FilterManager(QtCore.QObject):
@@ -16,16 +16,16 @@ class FilterManager(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        self._filter_editor = {}  # column_key: (column, cell)
+        self._filter_editor = {}
 
     def editor(self, column: Column) -> QtWidgets.QWidget:
-        if column.filter.type == filter.FilterType.MultipleChoice:
+        if column.filter.type == filter_.FilterType.MultipleChoice:
             factory = MultiChoiceEditorFactory(column.selection or [])
         else:
             factory = LineEditorFactory()
         return self._create_editor(column, factory)
 
-    def update_editor(self, column: Column, df: pd.DataFrame) -> Optional[QtWidgets.QWidget]:
+    def update_editor(self, column: Column, df: pd.DataFrame):
         _, factory, editor = self._filter_editor[column.key]
         if hasattr(factory, 'reset_editor'):
             new_selection = sorted(df[column.key].unique().tolist())
@@ -34,6 +34,7 @@ class FilterManager(QtCore.QObject):
     def _create_editor(self, column: Column, factory: EditorFactory) -> QtWidgets.QWidget:
         editor = factory.create()
         factory.done_signal(editor).connect(self._on_filter_update)
+        factory.set_place_holder(editor, column.filter.PlaceHolderText)
         self._filter_editor[column.key] = (column, factory, editor)
         return editor
 
