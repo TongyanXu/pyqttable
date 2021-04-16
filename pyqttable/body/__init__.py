@@ -27,9 +27,6 @@ class TableBody(QtWidgets.QTableWidget):
 
     def _setup_header(self) -> NoReturn:
         self.setColumnCount(len(self.columns))
-        # for j, col in enumerate(self.columns):
-        #     item = QtWidgets.QTableWidgetItem(col.key)
-        #     self.setHorizontalHeaderItem(j, item)
         self.horizontalHeader().setVisible(False)
 
     def _setup_delegate(self) -> NoReturn:

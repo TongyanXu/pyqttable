@@ -3,7 +3,8 @@
 
 import pandas as pd
 
-from PyQt5 import QtWidgets
+from . import utils
+from PyQt5 import QtWidgets, QtCore
 from pyqttable.column import Column
 from pyqttable.header import *
 from pyqttable.body import *
@@ -13,6 +14,7 @@ from typing import (
 
 
 class PyQtTable(QtWidgets.QWidget):
+    errorOccurred = QtCore.pyqtSignal(object, object)
 
     def __init__(self,
                  parent: Optional[QtWidgets.QWidget],
@@ -35,10 +37,12 @@ class PyQtTable(QtWidgets.QWidget):
         self._setup_components()
 
     @property
+    @utils.widget_error_signal
     def data(self) -> pd.DataFrame:
         return self._data.copy()
 
     @property
+    @utils.widget_error_signal
     def shown_data(self) -> pd.DataFrame:
         return self._shown_data.copy()
 
@@ -64,7 +68,8 @@ class PyQtTable(QtWidgets.QWidget):
             self._thead.horizontalScrollBar().setValue
         )
 
-    def set_data(self, data: List[Dict[str, Any]]) -> NoReturn:
+    @utils.widget_error_signal
+    def set_data(self, data: List[Dict[str, Any]]):
         self._data = self._shown_data = pd.DataFrame(data)
         self._thead.update_filter(self._data)
         self._display_data()
@@ -72,19 +77,21 @@ class PyQtTable(QtWidgets.QWidget):
     def _display_data(self) -> NoReturn:
         self._tbody.display(self._shown_data)
 
-    def _sorting_action(self, sort_func: callable) -> NoReturn:
+    @utils.widget_error_signal
+    def _sorting_action(self, sort_func: callable):
         self._shown_data = sort_func(self._shown_data)
         self._display_data()
 
-    def _filter_action(self, filter_func: callable) -> NoReturn:
+    @utils.widget_error_signal
+    def _filter_action(self, filter_func: callable):
         self._shown_data = filter_func(self._data)
         self._display_data()
 
-    def _update_data(self, row_index: int, column: Column, value: Any) -> NoReturn:
-        row = self._shown_data.iloc[row_index]
+    @utils.widget_error_signal
+    def _update_data(self, row_index: int, column: Column, value: Any):
         ori_index = self._shown_data.index[row_index]
-        self._data.loc[ori_index, column.key] = row.loc[column.key] = value
-        print(self._data)
+        self._data.loc[ori_index, column.key] = \
+            self._shown_data.loc[ori_index, column.key] = value
 
 
 if __name__ == '__main__':
