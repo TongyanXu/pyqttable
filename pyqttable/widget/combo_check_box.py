@@ -12,6 +12,7 @@ class ComboCheckBox(QtWidgets.QComboBox):
     """ComboBox with CheckBox on each row to support multi-selection"""
 
     Delimiter = const.DefaultDelimiter
+    ClearAll = 'Clear All'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,23 +35,26 @@ class ComboCheckBox(QtWidgets.QComboBox):
         # Prevent popup from closing when clicking on an item
         self.view().viewport().installEventFilter(self)
 
+        # Combine custom right click menu
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.right_menu_click)
+
     def resizeEvent(self, event: QtCore.QEvent.Resize) -> NoReturn:
         # Recompute text to elide as needed
         self.update_text()
         super().resizeEvent(event)
 
     def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
-
         if obj == self.lineEdit():
-            if event.type() == QtCore.QEvent.MouseButtonRelease:
+            if event.type() == QtCore.QEvent.MouseButtonRelease \
+                    and event.button() == QtCore.Qt.LeftButton:
                 if self.closeOnLineEditClick:
                     self.hidePopup()
                 else:
                     self.showPopup()
                 return True
             return False
-
-        if obj == self.view().viewport():
+        elif obj == self.view().viewport():
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 index = self.view().indexAt(event.pos())
                 item = self.model().item(index.row())
@@ -79,6 +83,17 @@ class ComboCheckBox(QtWidgets.QComboBox):
         self.killTimer(event.timerId())
         self.closeOnLineEditClick = False
 
+    def right_menu_click(self, pos):
+        _ = pos
+        menu = QtWidgets.QMenu(self)
+        menu.addAction(QtWidgets.QAction(self.ClearAll, menu))
+        menu.triggered.connect(self.right_menu_slot)
+        menu.exec_(QtGui.QCursor.pos())
+
+    def right_menu_slot(self, action: QtWidgets.QAction) -> NoReturn:
+        if action.text() == self.ClearAll:
+            self.clean_up()
+
     @classmethod
     def data_to_text(cls, data: List[str]) -> str:
         return cls.Delimiter.join(data)
@@ -99,6 +114,10 @@ class ComboCheckBox(QtWidgets.QComboBox):
         elided_text = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
         self.lineEdit().setText(elided_text)
 
+    def clean_up(self) -> NoReturn:
+        # Clean up current data
+        self.setCurrentData([])
+
     def addItem(self, text: str, data=None) -> NoReturn:
         item = QtGui.QStandardItem()
         item.setText(text)
@@ -118,7 +137,10 @@ class ComboCheckBox(QtWidgets.QComboBox):
         # Select the list of items according to given list data
         for i in range(self.model().rowCount()):
             if self.model().item(i).data() in data:
-                self.model().item(i).setCheckState(QtCore.Qt.Checked)
+                state = QtCore.Qt.Checked
+            else:
+                state = QtCore.Qt.Unchecked
+            self.model().item(i).setCheckState(state)
 
     def currentData(self, role=None) -> List[str]:
         # Return the list of selected items data
