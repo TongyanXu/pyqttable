@@ -149,7 +149,7 @@ class MultipleChoice(Filter):
                     to_value: Optional[callable]) -> bool:
         if isinstance(filter_value, str):
             filter_list = filter_value.split(self.Delimiter)
-            return content in filter_list
+            return to_string(content) in filter_list
         else:
             return False
 

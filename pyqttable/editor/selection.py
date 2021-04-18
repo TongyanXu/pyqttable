@@ -64,9 +64,10 @@ class MultiChoiceEditorFactory(SingleChoiceEditorFactory):
         return editor.editTextChanged
 
     def reset_editor(self, editor: klass, data: list) -> NoReturn:
-        model = editor.model()
-        model.removeRows(0, model.rowCount())
-        editor.addItems(data)
+        if not self.selection:
+            model = editor.model()
+            model.removeRows(0, model.rowCount())
+            editor.addItems(data)
 
 
 if __name__ == '__main__':

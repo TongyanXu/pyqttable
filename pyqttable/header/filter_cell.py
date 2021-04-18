@@ -20,7 +20,10 @@ class FilterManager(QtCore.QObject):
 
     def editor(self, column: Column) -> QtWidgets.QWidget:
         if column.filter.type == filter_.FilterType.MultipleChoice:
-            factory = MultiChoiceEditorFactory(column.selection or [])
+            column_selection = column.selection or []
+            str_selection = [column.type.to_string(each)
+                             for each in column_selection]
+            factory = MultiChoiceEditorFactory(str_selection)
         else:
             factory = LineEditorFactory()
         return self._create_editor(column, factory)
@@ -28,7 +31,7 @@ class FilterManager(QtCore.QObject):
     def update_editor(self, column: Column, df: pd.DataFrame):
         _, factory, editor = self._filter_editor[column.key]
         if hasattr(factory, 'reset_editor'):
-            new_selection = sorted(df[column.key].unique().tolist())
+            new_selection = sorted(df[column.key].apply(column.type.to_string).unique().tolist())
             factory.reset_editor(editor, new_selection)
 
     def _create_editor(self, column: Column, factory: EditorFactory) -> QtWidgets.QWidget:

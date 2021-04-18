@@ -108,7 +108,7 @@ class EditorFactory(metaclass=abc.ABCMeta):
         """
         ...
 
-    def reset_editor(self, editor: klass, *args, **kwargs) -> NoReturn:
+    def reset_editor(self, editor: klass, data: list) -> NoReturn:
         """
         Reset editor model for some reason
         * Optional method
@@ -116,7 +116,7 @@ class EditorFactory(metaclass=abc.ABCMeta):
         Parameters
         ----------
         editor: editor widget created by this factory
-        args, kwargs: other parameters to reset editor widget
+        data: data to reset editor widget
         """
         ...
 
