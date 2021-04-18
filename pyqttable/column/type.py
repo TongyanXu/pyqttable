@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""column type"""
 
 __all__ = ['ColumnType', 'DateColumnType', 'TimeColumnType', 'DateTimeColumnType', 'basic_column_type']
 
@@ -14,10 +14,18 @@ basic_column_type = [int, float, str, bool]
 
 
 class ColumnType(metaclass=abc.ABCMeta):
+    """
+    Column type
+    Methods to convert data between original format and string for display
+    Also bind EditorFactory to create data editor in table cell
+    """
+
+    # Editor factory to create cell editor in table
     EditorFactory = LineEditorFactory()
 
     @classmethod
     def make(cls, fetcher: ValueFetcher):
+        """Make ColumnType from ValueFetcher"""
         klass = fetcher.get('type')
         if isinstance(klass, cls):
             return klass
@@ -29,6 +37,7 @@ class ColumnType(metaclass=abc.ABCMeta):
             raise TypeError(f'invalid type \'{klass}\'')
 
     def to_string(self, value):
+        """try/except wrapper to convert data from original format to string"""
         try:
             return self.to_str(value)
         except Exception as e:
@@ -39,6 +48,7 @@ class ColumnType(metaclass=abc.ABCMeta):
             )
 
     def to_value(self, string):
+        """try/except wrapper to convert data from string to original format"""
         try:
             return self.to_val(string)
         except Exception as e:
@@ -50,14 +60,17 @@ class ColumnType(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def to_str(self, value):
+        """Convert data from original format to string"""
         ...
 
     @abc.abstractmethod
     def to_val(self, string):
+        """Convert data from string to original format"""
         ...
 
 
 class BasicColumnType(ColumnType):
+    """Column type for basic types - int/float/str/bool"""
 
     def __init__(self, cls):
         self.cls = cls
@@ -79,6 +92,9 @@ class BasicColumnType(ColumnType):
 
 
 class BoolColumnType(BasicColumnType):
+    """Special column type for boolean"""
+
+    # Boolean editor factory
     EditorFactory = BoolEditorFactory()
 
     def to_str(self, value):
@@ -89,8 +105,13 @@ class BoolColumnType(BasicColumnType):
 
 
 class DateTimeColumnType(ColumnType):
+    """Column type for datetime related variables"""
+
+    # Datetime format to display in table cell
     DtFormat = '%Y-%m-%d %H:%M:%S'
+    # Datetime format to display in cell editor
     EditorDtFormat = 'yyyy-MM-dd hh:mm:ss'
+    # Datetime editor factory
     EditorFactory = DateTimeEditorFactory(DtFormat, EditorDtFormat)
 
     def __init__(self, cls):
@@ -117,6 +138,8 @@ class DateTimeColumnType(ColumnType):
 
 
 class DateColumnType(DateTimeColumnType):
+    """Column type for datetime.date"""
+
     DtFormat = '%Y-%m-%d'
     EditorDtFormat = 'yyyy-MM-dd'
     EditorFactory = DateEditorFactory(DtFormat, EditorDtFormat)
@@ -126,6 +149,8 @@ class DateColumnType(DateTimeColumnType):
 
 
 class TimeColumnType(DateTimeColumnType):
+    """Column type for datetime.time"""
+
     DtFormat = '%H:%M:%S'
     EditorDtFormat = 'hh:mm:ss'
     EditorFactory = TimeEditorFactory(DtFormat, EditorDtFormat)

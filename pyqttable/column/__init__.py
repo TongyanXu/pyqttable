@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""column configurations"""
 
 __all__ = ['Column', 'ColumnGroup', 'align', 'default', 'sorter', 'type_', 'filter_', 'style']
 
@@ -11,6 +11,7 @@ from . import align, default, sorter, type as type_, filter as filter_, style
 
 @dataclass()
 class Column:
+    """Single column configuration"""
     key: str
     name: str
     type: type_.ColumnType
@@ -24,6 +25,7 @@ class Column:
 
     @classmethod
     def from_cfg(cls, cfg):
+        """Create Column from config dict"""
         fetcher = default.ValueFetcher(cfg)
         key = fetcher.get('key')
         return cls(
@@ -40,6 +42,7 @@ class Column:
         )
 
     def to_cfg(self):
+        """Create config dict from Column"""
         return dict(
             key=self.key,
             name=self.name,
@@ -57,8 +60,10 @@ class Column:
 
 
 class ColumnGroup:
+    """Group of column configurations"""
 
     def __init__(self, column_config: List[Dict[str, Any]]):
+        """Create list of Column from list of config dict"""
         try:
             self._columns = [Column.from_cfg(cfg)
                              for cfg in column_config]
@@ -70,6 +75,10 @@ class ColumnGroup:
 
     def __len__(self):
         return len(self._columns)
+
+    def config(self) -> List[Dict[str, Any]]:
+        """Create list of config dict from list of Column"""
+        return [column.to_cfg() for column in self]
 
 
 _cfg_error = '''

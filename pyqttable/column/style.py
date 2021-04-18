@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""column style"""
 
 __all__ = ['Style']
 
@@ -9,6 +9,11 @@ from typing import Union, Tuple
 
 
 class Style:
+    """
+    Column style including:
+    - font color
+    - background color
+    """
 
     def __init__(self, color: Union[str, Tuple[int], None] = None,
                  bg_color: Union[str, Tuple[int], None] = None):
@@ -30,18 +35,21 @@ class Style:
 
     @classmethod
     def make(cls, fetcher: ValueFetcher):
+        """Make Style from ValueFetcher"""
         return cls(
             color=fetcher.get('color'),
             bg_color=fetcher.get('bg_color'),
         )
 
     def apply_to_item(self, item: QtWidgets.QTableWidgetItem):
+        """Apply style to QTableWidgetItem"""
         if self.color:
             item.setForeground(self._color)
         if self.bg_color:
             item.setBackground(self._bg_color)
 
     def apply_to_widget(self, widget: QtWidgets.QWidget):
+        """Apply style to QWidget"""
         palette = QtGui.QPalette()
         updated = False
         if self.color:

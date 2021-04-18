@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""column content alignment"""
 
 __all__ = ['Alignment']
 
@@ -25,6 +25,7 @@ _vertical_flag = {
 
 
 class Alignment:
+    """Column content alignment (both horizontal and vertical)"""
 
     def __init__(self, h_align: str = 'l', v_align: str = 'c'):
         self.h_align, self.v_align = h_align, v_align
@@ -34,15 +35,18 @@ class Alignment:
 
     @classmethod
     def make(cls, fetcher: ValueFetcher):
+        """Make Alignment from ValueFetcher"""
         return cls(
             h_align=fetcher.get('h_align'),
             v_align=fetcher.get('v_align'),
         )
 
     def apply_to_item(self, item: QtWidgets.QTableWidgetItem):
+        """Apply alignment to QTableWidgetItem"""
         item.setTextAlignment(self._flag)
 
     def apply_to_widget(self, widget: QtWidgets.QWidget):
+        """Apply alignment to QWidget"""
         style = widget.style()
         style.visualAlignment(QtCore.Qt.LeftToRight, self._flag)
         widget.setStyle(style)

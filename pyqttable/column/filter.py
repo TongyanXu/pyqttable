@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""doc string"""
+"""column filter"""
 
 __all__ = ['Filter', 'FilterType']
 
@@ -15,6 +15,7 @@ from typing import List, Optional, Any
 
 
 class FilterType(enum.Enum):
+    """Column filter type"""
     Exact = 'exact'
     Contain = 'contain'
     Regex = 'regex'
@@ -23,6 +24,14 @@ class FilterType(enum.Enum):
 
 
 class Filter(metaclass=abc.ABCMeta):
+    """
+    Column filter, including:
+    - filter type
+    - filter widget info
+    - filter function
+    """
+
+    # Placeholder text for filter widget
     PlaceHolderText = ''
 
     def __init__(self, filter_type):
@@ -30,14 +39,20 @@ class Filter(metaclass=abc.ABCMeta):
 
     @classmethod
     def make(cls, fetcher: ValueFetcher):
+        """Make Filter from ValueFetcher"""
         filter_type = fetcher.get('filter_type')
+
+        # If filter_type is already Filter, just return
         if isinstance(filter_type, cls):
             return filter_type
+
+        # Convert filter_type to enum
         try:
             filter_type = FilterType(filter_type)
         except Exception as e:
             _ = e
         else:
+            # Make Filter instance according to FilterType
             if filter_type == FilterType.Exact:
                 return ExactFilter(filter_type)
             elif filter_type == FilterType.Contain:
@@ -48,11 +63,28 @@ class Filter(metaclass=abc.ABCMeta):
                 return ExpressionFilter(filter_type)
             elif filter_type == FilterType.MultipleChoice:
                 return MultipleChoice(filter_type)
+
+        # If FilterType is invalid, raise error
         raise TypeError(f'invalid filter type \'{filter_type}\'')
 
     def filter(self, df: pd.DataFrame, by: str, filter_value: Any,
                to_string: Optional[callable] = None,
                to_value: Optional[callable] = None) -> pd.DataFrame:
+        """
+        Filter DataFrame
+
+        Parameters
+        ----------
+        df: input DataFrame to be filtered
+        by: column key to do filtering
+        filter_value: current value passed by filter widget
+        to_string: function to convert data from original format to string
+        to_value: function to convert data from string to original format
+
+        Returns
+        -------
+        Filtered DataFrame
+        """
         kwargs = dict(filter_value=filter_value, to_string=to_string, to_value=to_value)
         return df[df[by].apply(self._filter_apply, **kwargs)].copy()
 
@@ -69,6 +101,7 @@ class Filter(metaclass=abc.ABCMeta):
 
     @staticmethod
     def common_filter(content: Any, filter_value: Any) -> bool:
+        """Common filter for all kinds of Filters"""
         if isinstance(filter_value, str):
             if filter_value == '#blank':
                 return False if content else True
@@ -80,10 +113,26 @@ class Filter(metaclass=abc.ABCMeta):
     def filter_each(self, content: Any, filter_value: Any,
                     to_string: Optional[callable],
                     to_value: Optional[callable]) -> bool:
+        """
+        Method to filter each value
+
+        Parameters
+        ----------
+        content: cell data to be filtered
+        filter_value: current value passed by filter widget
+        to_string: function to convert data from original format to string
+        to_value: function to convert data from string to original format
+
+        Returns
+        -------
+        Remain in result or not
+        """
         ...
 
 
 class ExactFilter(Filter):
+    """Perfect match filter"""
+
     PlaceHolderText = 'Exact'
 
     def filter_each(self, content: Any, filter_value: Any,
@@ -96,6 +145,8 @@ class ExactFilter(Filter):
 
 
 class ContainFilter(Filter):
+    """Contain filter"""
+
     PlaceHolderText = 'Contain'
 
     def filter_each(self, content: Any, filter_value: Any,
@@ -108,6 +159,8 @@ class ContainFilter(Filter):
 
 
 class RegexFilter(Filter):
+    """Filtered by regex expression"""
+
     PlaceHolderText = 'Regex'
 
     def filter_each(self, content: Any, filter_value: Any,
@@ -120,6 +173,8 @@ class RegexFilter(Filter):
 
 
 class ExpressionFilter(Filter):
+    """Filtered by python expression"""
+
     PlaceHolderText = 'Express'
 
     def filter_each(self, content: Any, filter_value: Any,
@@ -141,6 +196,8 @@ class ExpressionFilter(Filter):
 
 
 class MultipleChoice(Filter):
+    """Filter with multiple choices"""
+
     PlaceHolderText = 'Multi'
     Delimiter = const.DefaultDelimiter
 

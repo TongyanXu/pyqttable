@@ -28,7 +28,7 @@ class FilterManager(QtCore.QObject):
             factory = LineEditorFactory()
         return self._create_editor(column, factory)
 
-    def update_editor(self, column: Column, df: pd.DataFrame):
+    def update_editor(self, column: Column, df: pd.DataFrame) -> NoReturn:
         _, factory, editor = self._filter_editor[column.key]
         if hasattr(factory, 'reset_editor'):
             new_selection = sorted(df[column.key].apply(column.type.to_string).unique().tolist())
