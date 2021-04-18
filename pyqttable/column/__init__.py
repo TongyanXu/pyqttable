@@ -25,9 +25,10 @@ class Column:
     @classmethod
     def from_cfg(cls, cfg):
         fetcher = default.ValueFetcher(cfg)
+        key = fetcher.get('key')
         return cls(
-            key=fetcher.get('key'),
-            name=fetcher.get('name'),
+            key=key,
+            name=fetcher.get('name', key),
             type=type_.ColumnType.make(fetcher),
             editable=fetcher.get('editable'),
             default=fetcher.get('default'),

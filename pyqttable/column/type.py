@@ -14,7 +14,7 @@ basic_column_type = [int, float, str, bool]
 
 
 class ColumnType(metaclass=abc.ABCMeta):
-    editor_factory = LineEditorFactory()
+    EditorFactory = LineEditorFactory()
 
     @classmethod
     def make(cls, fetcher: ValueFetcher):
@@ -79,7 +79,7 @@ class BasicColumnType(ColumnType):
 
 
 class BoolColumnType(BasicColumnType):
-    editor_factory = BoolEditorFactory()
+    EditorFactory = BoolEditorFactory()
 
     def to_str(self, value):
         return 'True' if value else 'False'
@@ -89,9 +89,9 @@ class BoolColumnType(BasicColumnType):
 
 
 class DateTimeColumnType(ColumnType):
-    format = '%Y-%m-%d %H:%M:%S'
-    editor_format = 'yyyy-MM-dd hh:mm:ss'
-    editor_factory = DateTimeEditorFactory(format, editor_format)
+    DtFormat = '%Y-%m-%d %H:%M:%S'
+    EditorDtFormat = 'yyyy-MM-dd hh:mm:ss'
+    EditorFactory = DateTimeEditorFactory(DtFormat, EditorDtFormat)
 
     def __init__(self, cls):
         self.cls = cls
@@ -110,25 +110,25 @@ class DateTimeColumnType(ColumnType):
     def to_str(self, value):
         assert isinstance(value, self.cls), \
             f'invalid {self.cls} given: \'{value}\''
-        return value.strftime(self.format)
+        return value.strftime(self.DtFormat)
 
     def to_val(self, string):
-        return dt.datetime.strptime(self.format, string)
+        return dt.datetime.strptime(self.DtFormat, string)
 
 
 class DateColumnType(DateTimeColumnType):
-    format = '%Y-%m-%d'
-    editor_format = 'yyyy-MM-dd'
-    editor_factory = DateEditorFactory(format, editor_format)
+    DtFormat = '%Y-%m-%d'
+    EditorDtFormat = 'yyyy-MM-dd'
+    EditorFactory = DateEditorFactory(DtFormat, EditorDtFormat)
 
     def to_val(self, string):
         return super().to_val(string).date()
 
 
 class TimeColumnType(DateTimeColumnType):
-    format = '%H:%M:%S'
-    editor_format = 'hh:mm:ss'
-    editor_factory = TimeEditorFactory(format, editor_format)
+    DtFormat = '%H:%M:%S'
+    EditorDtFormat = 'hh:mm:ss'
+    EditorFactory = TimeEditorFactory(DtFormat, EditorDtFormat)
 
     def to_val(self, string):
         return super().to_val(string).time()

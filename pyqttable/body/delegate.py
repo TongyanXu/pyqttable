@@ -21,8 +21,8 @@ class DelegateSetter:
     def get_editor_factory(column: Column) -> Optional[EditorFactory]:
         if column.selection:
             return SingleChoiceEditorFactory(column.selection)
-        if column.type.editor_factory is not None:
-            return column.type.editor_factory
+        if column.type.EditorFactory is not None:
+            return column.type.EditorFactory
         return None
 
     def get_delegate(self, column: Column) -> Optional[QtWidgets.QStyledItemDelegate]:

@@ -22,17 +22,19 @@ class ValueFetcher:
     def __init__(self, config):
         self.config = config
 
-    def get(self, key):
-        return load(self.config, key)
+    def get(self, key, default=None):
+        return load(self.config, key, default)
 
 
-def load(cfg, key):
+def load(cfg, key, dft=None):
     if key in cfg and cfg[key] is not None:
         return cfg[key]
+    elif dft is not None:
+        return dft
     elif hasattr(_DefaultColumn, key):
         return getattr(_DefaultColumn, key)
     else:
-        raise KeyError()
+        raise KeyError(f'Missing key \'{key}\'')
 
 
 if __name__ == '__main__':
