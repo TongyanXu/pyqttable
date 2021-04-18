@@ -5,6 +5,7 @@ A simple configurable table widget based on PyQt5 and pandas
 ## How to use
 ```
 from pyqttable import PyQtTable
+
 table_widget = PyQtTable(
     parent=None, 
     column_config=my_config,
@@ -28,21 +29,21 @@ A list of configurations for each column
 | selection | list of valid values | list | None |
 | sort_lt |  DIY \_\_lt\_\_ methods for sorting (only effective when sortable is True) | # see Column.Sort | None |
 | filter_type | filter type (only effective when show_filter is True) | # see Column.Filter | 'contain' |
-| color | font color (string like '#000000' or tuple like (0, 0, 0, Optional[0])) | # see Column.Color | None |
+| color | font color (in string or tuple indicating RGB) | # see Column.Color | None |
 | bg_color | background color (same format as color) | # see Column.Color | None |
 
 ### Example
 ```
 {
-    'key': 'gender', 
-    'name': 'Gender', 
-    'type': str, 
-    'editable': False,
-    'selection': ['male', 'female'],
-    'h_align': 'r', 
-    'sort_lt': lambda x, y: x == 'Female'
-    'filter_type': 'multiple_choice', 
-    'bg_color': (135, 206, 250)},
+    'key': 'gender',                        # same as DataFrame column
+    'name': 'Gender',                       # shown as table header
+    'type': str,                            # string variable
+    'editable': False,                      # read-only
+    'selection': ['male', 'female'],        # could be either 'male' or 'female'
+    'h_align': 'r',                         # align right
+    'sort_lt': lambda x, y: x == 'female',  # 'female' < 'male'
+    'filter_type': 'multiple_choice',       # multiple-choice filter
+    'bg_color': (135, 206, 250)},           # blue opaque background
 }
 ```
 
@@ -76,7 +77,7 @@ class MyColumnType(type_.ColumnType):
  
 ### Column.Align
 
-| Key | Valid column align | Flag |
+| Key | Valid value | Flag |
 | --- | --- | --- |
 | h_align | 'l' / 'left' | AlignLeft |
 | h_align | 'r' / 'right' | AlignRight |
@@ -90,7 +91,7 @@ class MyColumnType(type_.ColumnType):
 | Value type | Value format |
 | --- | --- |
 | str | '#RRGGBB' |
-| Tuple[int] | (R, G, B, T) |
+| Tuple[int] | (R, G, B, Optional[T]) |
 
 ### Column.Filter
 Column filter type should by following string
