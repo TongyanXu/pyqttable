@@ -27,7 +27,7 @@ class ValueFetcher:
 
 
 def load(cfg, key):
-    if key in cfg:
+    if key in cfg and cfg[key] is not None:
         return cfg[key]
     elif hasattr(_DefaultColumn, key):
         return getattr(_DefaultColumn, key)

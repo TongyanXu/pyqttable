@@ -5,7 +5,7 @@ __all__ = ['TableCell']
 
 import pandas as pd
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from pyqttable.column import Column
 from typing import Any
 
@@ -16,6 +16,8 @@ class TableCell(QtWidgets.QTableWidgetItem):
         self.column_cfg = column
         display_value = self.column_cfg.type.to_string(value)
         super().__init__(display_value)
+        if not self.column_cfg.editable:
+            self.setFlags(self.flags() & ~ QtCore.Qt.ItemIsEditable)
         self.column_cfg.align.apply_to_item(self)
         self.column_cfg.style.apply_to_item(self)
 

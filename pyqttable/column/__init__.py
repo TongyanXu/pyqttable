@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['Column', 'align', 'default', 'sorter', 'type_', 'filter_', 'style']
+__all__ = ['Column', 'ColumnGroup', 'align', 'default', 'sorter', 'type_', 'filter_', 'style']
 
 from dataclasses import dataclass
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 
 from . import align, default, sorter, type as type_, filter as filter_, style
 
@@ -19,7 +19,7 @@ class Column:
     align: align.Alignment
     selection: Optional[List]
     sorter: sorter.Sorter
-    filter: filter.Filter
+    filter: filter_.Filter
     style: style.Style
 
     @classmethod
@@ -34,7 +34,7 @@ class Column:
             align=align.Alignment.make(fetcher),
             selection=fetcher.get('selection'),
             sorter=sorter.Sorter.make(fetcher),
-            filter=filter.Filter.make(fetcher),
+            filter=filter_.Filter.make(fetcher),
             style=style.Style.make(fetcher),
         )
 
@@ -53,6 +53,29 @@ class Column:
             color=self.style.color,
             bg_color=self.style.bg_color,
         )
+
+
+class ColumnGroup:
+
+    def __init__(self, column_config: List[Dict[str, Any]]):
+        try:
+            self._columns = [Column.from_cfg(cfg)
+                             for cfg in column_config]
+        except Exception as e:
+            raise ValueError(_cfg_error.format(str(e)))
+
+    def __iter__(self):
+        return iter(self._columns)
+
+    def __len__(self):
+        return len(self._columns)
+
+
+_cfg_error = '''
+Invalid column_config.
+Following error found:
+{error_msg}
+'''
 
 
 if __name__ == '__main__':

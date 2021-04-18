@@ -9,16 +9,16 @@ from .cell import *
 from .delegate import *
 
 from PyQt5 import QtWidgets, QtCore
-from pyqttable.column import Column
-from typing import List, NoReturn
+from pyqttable.column import ColumnGroup
+from typing import NoReturn
 
 
 class TableBody(QtWidgets.QTableWidget):
     dataEdited = QtCore.pyqtSignal(int, object, object)
 
-    def __init__(self, parent: QtWidgets.QWidget, columns: List[Column]):
+    def __init__(self, parent: QtWidgets.QWidget, col_group: ColumnGroup):
         super().__init__(parent)
-        self.columns = columns
+        self._column_group = col_group
         self._delegate_setter = DelegateSetter(self)
         self._data_change_lock = False
         self._setup_header()
@@ -26,11 +26,11 @@ class TableBody(QtWidgets.QTableWidget):
         self._setup_cell()
 
     def _setup_header(self) -> NoReturn:
-        self.setColumnCount(len(self.columns))
+        self.setColumnCount(len(self._column_group))
         self.horizontalHeader().setVisible(False)
 
     def _setup_delegate(self) -> NoReturn:
-        for j, col in enumerate(self.columns):
+        for j, col in enumerate(self._column_group):
             item_delegate = self._delegate_setter.get_delegate(col)
             if item_delegate is not None:
                 self.setItemDelegateForColumn(j, item_delegate)
@@ -44,7 +44,7 @@ class TableBody(QtWidgets.QTableWidget):
         self.setRowCount(len(data))
         records = data.to_dict('records')
         for i, row in enumerate(records):
-            for j, col in enumerate(self.columns):
+            for j, col in enumerate(self._column_group):
                 cell_item = TableCell.from_row(row, col)
                 self.setItem(i, j, cell_item)
         self._data_change_lock = False
