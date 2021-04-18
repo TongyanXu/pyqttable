@@ -1,6 +1,6 @@
-# pyqt-table
+# pyqttable
 
-A simple configurable QTableWidget based on PyQt5 and pandas
+A simple configurable table widget based on PyQt5 and pandas
 
 ## How to use
 ```
