@@ -116,3 +116,15 @@ class MyFilterType(filter_.Filter):
 Variable sort_lt should be a function with same signature as \_\_lt\_\_
 When sort_lt is defined, sorting action will based on sort_lt instead of default \_\_lt\_\_
 
+## How to set data
+```
+import pandas as pd
+my_data = pd.DataFrame(...)
+table_widget.set_data(my_data)
+```
+
+## How to get data
+```
+my_data = table_widget.get(data)
+shown_data = table_widget.get(data, full=False)
+```
