@@ -70,7 +70,9 @@ Column type should be following class (not instance)
 | datetime.time |
 
 Column type can also be instance of ColumnType
+
 Inherit from ColumnType to make DIY column type
+
 Inherit from EditorFactory to make DIY editor for DIY column type (if required)
 ```
 from pyqttable.column import type_
@@ -114,6 +116,7 @@ Column filter type should by following string
 | 'multiple_choice' |
 
 Column filter type can also be instance of Filter
+
 Inherit from Filter to make DIY filter type
 ```
 from pyqttable.column import filter_
@@ -124,7 +127,9 @@ class MyFilterType(filter_.Filter):
 
 ### Column.Sort
 Sorting is triggered by right click on headers
+
 Variable sort_lt should be a function with same signature as \_\_lt\_\_
+
 When sort_lt is defined, sorting action will based on sort_lt instead of default \_\_lt\_\_
 
 ## How to set data
