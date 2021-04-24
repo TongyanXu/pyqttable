@@ -9,12 +9,12 @@ __all__ = ['PyQtTable']
 
 import pandas as pd
 
-from . import header, body, column, utils
+from . import column, delegate, header, utils
 from PyQt5 import QtWidgets, QtCore
 from typing import List, Dict, Any, Optional, NoReturn
 
 
-class PyQtTable(QtWidgets.QWidget):
+class PyQtTable(QtWidgets.QTableWidget):
     """
     PyQtTable widget -
 
@@ -71,13 +71,14 @@ class PyQtTable(QtWidgets.QWidget):
         self._data: pd.DataFrame = pd.DataFrame()
         self._shown_data: pd.DataFrame = pd.DataFrame()
 
-        # Make header, body, and layout
-        self._thead = header.TableHeader(self, self._column_group, show_filter, sortable)
-        self._tbody = body.TableBody(self, self._column_group)
-        self._layout = QtWidgets.QVBoxLayout(self)
+        # Make header/delegate components
+        self._header_manager = header.HeaderManager(self, self._column_group, show_filter, sortable)
+        self._delegate_setter = delegate.DelegateSetter(self)
+
+        # Data change lock to distinguish manually change on UI and set_data
+        self._lock = utils.NameLock()
 
         # Setup UI components
-        self._setup_layout()
         self._setup_components()
 
     @utils.widget_error_signal
@@ -105,54 +106,77 @@ class PyQtTable(QtWidgets.QWidget):
         """
         df = data.reset_index(drop=True)
         self._data = self._shown_data = df
-        self._thead.update_filter(self._data)
+        self._header_manager.update_filter(self._data)
         self._display_data()
-
-    def _setup_layout(self) -> NoReturn:
-        self._layout.addWidget(self._thead)
-        self._layout.addWidget(self._tbody)
-
-        self._layout.setSpacing(0)
-        self._layout.setContentsMargins(0, 0, 0, 0)
-        self._thead.setContentsMargins(0, 0, 0, 0)
-        self._tbody.setContentsMargins(0, 0, 0, 0)
 
     def _setup_components(self) -> NoReturn:
         # Filter actions
-        self._thead.filterTriggered.connect(self._filter_action)
+        self._header_manager.filterTriggered.connect(self._filter_action)
 
         # Sorting actions
-        self._thead.sortingTriggered.connect(self._sorting_action)
+        self._header_manager.sortTriggered.connect(self._sort_action)
 
         # Data editing actions
-        self._tbody.dataEdited.connect(self._update_data)
+        self.cellChanged.connect(self._update_data)
 
-        # ScrollBars moving actions
-        self._thead.horizontalScrollBar().valueChanged.connect(
-            self._tbody.horizontalScrollBar().setValue
-        )
-        self._tbody.horizontalScrollBar().valueChanged.connect(
-            self._thead.horizontalScrollBar().setValue
-        )
+        # Customized delegate
+        for j, col in enumerate(self._column_group):
+            item_delegate = self._delegate_setter.get_delegate(col)
+            if item_delegate is not None:
+                self.setItemDelegateForColumn(j, item_delegate)
 
     def _display_data(self) -> NoReturn:
-        self._tbody.display(self._shown_data)
+        with self._lock.get_lock('display_data'):
+            self.clearContents()
+            self.setRowCount(len(self._shown_data))
+            records = self._shown_data.to_dict('records')
+            for i, row in enumerate(records):
+                for j, col in enumerate(self._column_group):
+                    cell_item = TableCell.from_row(row, col)
+                    self.setItem(i, j, cell_item)
+            self._data_change_lock = False
 
     @utils.widget_error_signal
-    def _sorting_action(self, sort_func: callable):
+    def _sort_action(self, sort_func: callable):
         self._shown_data = sort_func(self._shown_data)
         self._display_data()
 
     @utils.widget_error_signal
     def _filter_action(self, filter_func: callable):
-        self._shown_data = filter_func(self._data)
+        filtered_data = filter_func(self._data)
+        self._shown_data = self._header_manager.sort(filtered_data)
         self._display_data()
 
     @utils.widget_error_signal
-    def _update_data(self, row_index: int, col: column.Column, value: Any):
-        ori_index = self._shown_data.index[row_index]
-        self._data.loc[ori_index, col.key] = \
-            self._shown_data.loc[ori_index, col.key] = value
+    def _update_data(self, row: int, col: int):
+        if not self._lock.get_lock('display_data'):
+            item = self.item(row, col)
+            assert isinstance(item, TableCell)
+            column_cfg = item.column_cfg
+            ori_index = self._shown_data.index[row]
+            self._data.loc[ori_index, column_cfg.key] = \
+                self._shown_data.loc[ori_index, column_cfg.key] = item.value
+
+
+class TableCell(QtWidgets.QTableWidgetItem):
+
+    def __init__(self, value: Any, column_cfg: column.Column):
+        self.column_cfg = column_cfg
+        display_value = self.column_cfg.type.to_string(value)
+        super().__init__(display_value)
+        if not self.column_cfg.editable:
+            self.setFlags(self.flags() & ~ QtCore.Qt.ItemIsEditable)
+        self.column_cfg.align.apply_to_item(self)
+        self.column_cfg.style.apply_to_item(self)
+
+    @classmethod
+    def from_row(cls, row_data: pd.Series, column_cfg: column.Column):
+        val = row_data.get(column_cfg.key, column_cfg.default)
+        return cls(val, column_cfg)
+
+    @property
+    def value(self) -> Any:
+        return self.column_cfg.type.to_value(self.text())
 
 
 if __name__ == '__main__':

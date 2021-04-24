@@ -14,9 +14,6 @@ class DelegateSetter:
     def __init__(self, parent: QtWidgets.QTableWidget):
         self._parent = parent
 
-    def parent(self) -> QtWidgets.QTableWidget:
-        return self._parent
-
     @staticmethod
     def get_editor_factory(column: Column) -> Optional[EditorFactory]:
         if column.selection:
@@ -30,7 +27,7 @@ class DelegateSetter:
     def get_delegate(self, column: Column) -> Optional[QtWidgets.QStyledItemDelegate]:
         editor_factory = self.get_editor_factory(column)
         if editor_factory:
-            return EditorDelegate(self.parent(), editor_factory)
+            return EditorDelegate(self._parent, editor_factory)
         return None
 
 

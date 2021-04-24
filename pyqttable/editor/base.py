@@ -108,17 +108,17 @@ class EditorFactory(metaclass=abc.ABCMeta):
         """
         ...
 
-    def reset_editor(self, editor: klass, data: list) -> NoReturn:
-        """
-        Reset editor model for some reason
-        * Optional method
-
-        Parameters
-        ----------
-        editor: editor widget created by this factory
-        data: data to reset editor widget
-        """
-        ...
+    # def reset_editor(self, editor: klass, data: list) -> NoReturn:
+    #     """
+    #     Reset editor model for some reason
+    #     * Optional method
+    #
+    #     Parameters
+    #     ----------
+    #     editor: editor widget created by this factory
+    #     data: data to reset editor widget
+    #     """
+    #     ...
 
 
 if __name__ == '__main__':

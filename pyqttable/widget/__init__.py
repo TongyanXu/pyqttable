@@ -2,6 +2,7 @@
 """self defined widget"""
 
 from .combo_check_box import *
+from .filter_view import *
 
 
 if __name__ == '__main__':

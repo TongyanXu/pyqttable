@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['error_handler', 'widget_error_handler', 'widget_error_signal']
+__all__ = ['error_handler', 'widget_error_handler', 'widget_error_signal', 'NameLock']
 
+import contextlib as cl
 import functools as ft
 import traceback as tb
 
@@ -53,6 +54,24 @@ def widget_error_signal(method):
             return res
 
     return wrapped_method
+
+
+class NameLock:
+
+    def __init__(self):
+        self._lock_status = {}
+
+    def check_lock(self, name: str) -> bool:
+        return self._lock_status.get(name, False)
+
+    @cl.contextmanager
+    def get_lock(self, name: str):
+        if not self.check_lock(name):
+            self._lock_status[name] = True
+            yield
+            self._lock_status[name] = False
+        else:
+            raise PermissionError(f'Failed to get lock \'{name}\'')
 
 
 if __name__ == '__main__':
