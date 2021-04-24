@@ -5,11 +5,37 @@ __all__ = ['HeaderManager']
 
 import pandas as pd
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from pyqttable.column import *
 from pyqttable.editor import *
 from pyqttable.widget import *
-from typing import List, NoReturn
+from typing import NoReturn
+
+
+class NormalHeaderView(QtWidgets.QHeaderView):
+    sectionRightClicked = QtCore.pyqtSignal(int)
+
+    def __init__(self, parent: QtWidgets.QTableWidget):
+        super().__init__(QtCore.Qt.Horizontal, parent)
+        self.setStretchLastSection(True)
+        self.setSectionsClickable(True)
+        self.setSortIndicatorShown(False)
+
+    def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> NoReturn:
+        if e.button() == QtCore.Qt.RightButton:
+            index = self.logicalIndexAt(e.pos())
+            self.sectionRightClicked.emit(index)
+        super().mouseReleaseEvent(e)
+
+
+class FilterHeaderView(FilterHeader):
+    sectionRightClicked = QtCore.pyqtSignal(int)
+
+    def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> NoReturn:
+        if e.button() == QtCore.Qt.RightButton:
+            index = self.logicalIndexAt(e.pos())
+            self.sectionRightClicked.emit(index)
+        super().mouseReleaseEvent(e)
 
 
 class HeaderViewItem(QtWidgets.QTableWidgetItem):
@@ -74,8 +100,10 @@ class HeaderManager(QtCore.QObject):
     def _setup_ui(self) -> NoReturn:
         # If show filter, replace horizontal header to FilterHeader
         if self.show_filter:
-            header = FilterHeader(self._parent)
-            self._parent.setHorizontalHeader(header)
+            header = FilterHeaderView(self._parent)
+        else:
+            header = NormalHeaderView(self._parent)
+        self._parent.setHorizontalHeader(header)
 
         # Set horizontal header items one by one
         self._parent.setColumnCount(len(self._column_group))
@@ -88,12 +116,11 @@ class HeaderManager(QtCore.QObject):
 
         # If show filter, set list of filter widgets to FilterHeader
         if self.show_filter:
-            header = self._parent.horizontalHeader()
             header.filters = filter_widgets
 
         # If sortable, connect sorting signal to sorting slot
         if self.sortable:
-            self._parent.horizontalHeader().sectionClicked.connect(self._on_sorting)
+            header.sectionRightClicked.connect(self._on_sorting)
 
     # ================================ Filter Part ================================
 
@@ -170,10 +197,12 @@ class HeaderManager(QtCore.QObject):
         else:
             header.setSortIndicatorShown(False)
 
-    @property
-    def sort(self) -> callable:
-        # Get sorting function from clicked HeaderViewItem
-        return self._curr_sorting_on.sort
+    def sort(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Sort DataFrame by current sorting item
+        if self._curr_sorting_on is not None:
+            return self._curr_sorting_on.sort(df)
+        else:
+            return df
 
     def _on_sorting(self, index: int) -> NoReturn:
         """
