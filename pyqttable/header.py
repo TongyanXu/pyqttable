@@ -9,17 +9,16 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from pyqttable.column import *
 from pyqttable.editor import *
 from pyqttable.widget import *
-from typing import NoReturn
+from typing import Dict, NoReturn
 
 
 class NormalHeaderView(QtWidgets.QHeaderView):
     sectionRightClicked = QtCore.pyqtSignal(int)
 
-    def __init__(self, parent: QtWidgets.QTableWidget):
-        super().__init__(QtCore.Qt.Horizontal, parent)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.setStretchLastSection(True)
         self.setSectionsClickable(True)
-        self.setSortIndicatorShown(False)
 
     def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> NoReturn:
         if e.button() == QtCore.Qt.RightButton:
@@ -75,17 +74,20 @@ class HeaderManager(QtCore.QObject):
     sortTriggered = QtCore.pyqtSignal(object)
 
     def __init__(self, parent: QtWidgets.QTableWidget, col_group: ColumnGroup,
-                 show_filter: bool = False, sortable: bool = False):
+                 show_filter: bool = False, sortable: bool = False, draggable: bool = False):
         super().__init__(parent)
         self._parent = parent
         self._column_group = col_group
         self._show_filter = show_filter
         self._sortable = sortable
+        self._draggable = draggable
 
         self._filter_editor = {}
         self._curr_sorting_on = None
 
         self._setup_ui()
+
+    # ================================ Public Methods ================================
 
     @property
     def show_filter(self) -> bool:
@@ -94,6 +96,19 @@ class HeaderManager(QtCore.QObject):
     @property
     def sortable(self) -> bool:
         return self._sortable
+
+    @property
+    def draggable(self) -> bool:
+        return self._draggable
+
+    @property
+    def filter_value(self) -> Dict[str, str]:
+        filter_dict = {}
+        for key, (column, factory, cell) in self._filter_editor.items():
+            value = factory.get_data(cell)
+            if value != '':
+                filter_dict[key] = value
+        return filter_dict
 
     # ================================ Setup Part ================================
 
@@ -121,6 +136,9 @@ class HeaderManager(QtCore.QObject):
         # If sortable, connect sorting signal to sorting slot
         if self.sortable:
             header.sectionRightClicked.connect(self._on_sorting)
+
+        # If draggable, set header movable
+        header.setSectionsMovable(self.draggable)
 
     # ================================ Filter Part ================================
 

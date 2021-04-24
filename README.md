@@ -19,6 +19,7 @@ table_widget = PyQtTable(
     column_config=my_config,  # column configurations
     show_filter=True,         # show filter in header
     sortable=True,            # sortable column (triggered by right click)
+    draggable=True,           # draggable column
 )
 ```
 
@@ -135,6 +136,11 @@ table_widget.set_data(my_data)
 
 ## How to get data
 ```
-my_data = table_widget.get(data)
-shown_data = table_widget.get(data, full=False)
+my_data = table_widget.get_data(data)
+shown_data = table_widget.get_data(data, full=False)
+```
+
+## How to get filter data
+```
+current_filter_dict = table_widget.get_filter_data()
 ```

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-PyQtTable - v0.0.1
+PyQtTable - v0.0.2
+A simple configurable table widget based on PyQt5 and pandas
 
 copyright by Tongyan Xu
 """
@@ -16,11 +17,12 @@ from typing import List, Dict, Any, Optional, NoReturn
 
 class PyQtTable(QtWidgets.QTableWidget):
     """
-    PyQtTable widget -
+    PyQtTable widget - subclass of QTableWidget
 
     methods:
     get_data(full) -> pd.DataFrame
     set_data(data)
+    get_filter_data() -> Dict[str, str]
 
     signals:
     errorOccurred(Exception, traceback)
@@ -35,6 +37,7 @@ class PyQtTable(QtWidgets.QTableWidget):
                  column_config: List[Dict[str, Any]] = None,
                  show_filter: bool = False,
                  sortable: bool = False,
+                 draggable: bool = False,
                  ):
         """
         create a PyQtTable widget using column configurations
@@ -62,6 +65,7 @@ class PyQtTable(QtWidgets.QTableWidget):
                 )
         show_filter: show filter in header or not
         sortable: sorting is allowed or not
+        draggable: column is draggable or not
         """
         super().__init__(parent)
         # Column configuration setup
@@ -72,7 +76,8 @@ class PyQtTable(QtWidgets.QTableWidget):
         self._shown_data: pd.DataFrame = pd.DataFrame()
 
         # Make header/delegate components
-        self._header_manager = header.HeaderManager(self, self._column_group, show_filter, sortable)
+        self._header_manager = header.HeaderManager(self, self._column_group,
+                                                    show_filter, sortable, draggable)
         self._delegate_setter = delegate.DelegateSetter(self)
 
         # Data change lock to distinguish manually change on UI and set_data
@@ -80,6 +85,8 @@ class PyQtTable(QtWidgets.QTableWidget):
 
         # Setup UI components
         self._setup_components()
+
+    # ================================ Public Methods ================================
 
     @utils.widget_error_signal
     def get_data(self, full: bool = True) -> pd.DataFrame:
@@ -90,6 +97,10 @@ class PyQtTable(QtWidgets.QTableWidget):
         ----------
         full: if True, all data (including hidden rows) will be returned
             if False, only currently shown rows will be returned
+
+        Returns
+        -------
+        Full or filtered data
         """
         return self._data.copy() if full else self._shown_data.copy()
 
@@ -108,6 +119,19 @@ class PyQtTable(QtWidgets.QTableWidget):
         self._data = self._shown_data = df
         self._header_manager.update_filter(self._data)
         self._display_data()
+
+    def get_filter_data(self) -> Dict[str, str]:
+        """
+        Get table filter data
+
+        Returns
+        -------
+        Dictionary of key - filter string
+        """
+        return self._header_manager.filter_value \
+            if self._header_manager.show_filter else {}
+
+    # ================================ Private Methods ================================
 
     def _setup_components(self) -> NoReturn:
         # Filter actions

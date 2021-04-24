@@ -17,8 +17,8 @@ class FilterHeader(QtWidgets.QHeaderView):
         self._padding = padding
         self.setStretchLastSection(True)
         self.setSectionsClickable(True)
-        self.setSortIndicatorShown(False)
         self.sectionResized.connect(self.adjustPositions)
+        self.sectionMoved.connect(self.adjustPositions)
         parent.horizontalScrollBar().valueChanged.connect(self.adjustPositions)
 
     @property
@@ -37,7 +37,7 @@ class FilterHeader(QtWidgets.QHeaderView):
         filter_widgets = []
         for index in range(count):
             editor = QtWidgets.QLineEdit(self.parent())
-            editor.setPlaceholderText('Filter')
+            editor.setPlaceholderText(f'Filter{index}')
             editor.returnPressed.connect(self.filterActivated.emit)
             filter_widgets.append(editor)
         self.filters = filter_widgets
