@@ -3,14 +3,22 @@
 A simple configurable table widget based on PyQt5 and pandas
 
 ## How to use
+
+### Get version
+```
+from pyqttable import version
+
+print(version.VERSION)
+```
+### Create table
 ```
 from pyqttable import PyQtTable
 
 table_widget = PyQtTable(
-    parent=None, 
-    column_config=my_config,
-    show_filter=True,
-    sortable=True,
+    parent=None,              # parent widget
+    column_config=my_config,  # column configurations
+    show_filter=True,         # show filter in header
+    sortable=True,            # sortable column (triggered by right click)
 )
 ```
 
@@ -114,6 +122,7 @@ class MyFilterType(filter_.Filter):
 ```
 
 ### Column.Sort
+Sorting is triggered by right click on headers
 Variable sort_lt should be a function with same signature as \_\_lt\_\_
 When sort_lt is defined, sorting action will based on sort_lt instead of default \_\_lt\_\_
 
