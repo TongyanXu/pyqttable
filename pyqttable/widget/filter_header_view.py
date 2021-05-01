@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """doc string"""
 
-__all__ = ['FilterHeader']
+__all__ = ['FilterHHeaderView']
 
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from typing import List, NoReturn
 
 
-class FilterHeader(QtWidgets.QHeaderView):
+class FilterHHeaderView(QtWidgets.QHeaderView):
     filterActivated = QtCore.pyqtSignal()
 
     def __init__(self, parent: QtWidgets.QTableWidget, padding: int = 0):
@@ -88,7 +88,7 @@ if __name__ == '__main__':
             self.view = QtWidgets.QTableView()
             layout = QtWidgets.QVBoxLayout(self)
             layout.addWidget(self.view)
-            header = FilterHeader(self.view)
+            header = FilterHHeaderView(self.view)
             self.view.setHorizontalHeader(header)
             model = QtGui.QStandardItemModel(self.view)
             model.setHorizontalHeaderLabels('One Two Three Four Five'.split())

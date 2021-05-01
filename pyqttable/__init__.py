@@ -10,7 +10,7 @@ __all__ = ['PyQtTable']
 
 import pandas as pd
 
-from . import column, delegate, header, utils
+from . import column, delegate, header, utils, widget
 from PyQt5 import QtWidgets, QtCore
 from typing import List, Dict, Any, Optional, NoReturn
 
@@ -38,6 +38,7 @@ class PyQtTable(QtWidgets.QTableWidget):
                  show_filter: bool = False,
                  sortable: bool = False,
                  draggable: bool = False,
+                 checkable: bool = False,
                  ):
         """
         create a PyQtTable widget using column configurations
@@ -66,10 +67,15 @@ class PyQtTable(QtWidgets.QTableWidget):
         show_filter: show filter in header or not
         sortable: sorting is allowed or not
         draggable: column is draggable or not
+        checkable: row is checkable or not (QCheckBox in vertical header)  # not implemented
         """
         super().__init__(parent)
         # Column configuration setup
         self._column_group = column.ColumnGroup(column_config)
+        self._show_filter = show_filter
+        self._sortable = sortable
+        self._draggable = draggable
+        self._checkable = checkable
 
         # Empty data
         self._data: pd.DataFrame = pd.DataFrame()
@@ -153,23 +159,27 @@ class PyQtTable(QtWidgets.QTableWidget):
         with self._lock.get_lock('display_data'):
             self.clearContents()
             self.setRowCount(len(self._shown_data))
-            records = self._shown_data.to_dict('records')
-            for i, row in enumerate(records):
+            row_num = 0
+            for i, row in self._shown_data.iterrows():
+                row_item = QtWidgets.QTableWidgetItem(str(i + 1))
+                self.setVerticalHeaderItem(row_num, row_item)
                 for j, col in enumerate(self._column_group):
                     cell_item = TableCell.from_row(row, col)
-                    self.setItem(i, j, cell_item)
-            self._data_change_lock = False
+                    self.setItem(row_num, j, cell_item)
+                row_num += 1
 
     @utils.widget_error_signal
     def _sort_action(self, sort_func: callable):
-        self._shown_data = sort_func(self._shown_data)
-        self._display_data()
+        if not self._lock.get_lock('display_data'):
+            self._shown_data = sort_func(self._shown_data)
+            self._display_data()
 
     @utils.widget_error_signal
     def _filter_action(self, filter_func: callable):
-        filtered_data = filter_func(self._data)
-        self._shown_data = self._header_manager.sort(filtered_data)
-        self._display_data()
+        if not self._lock.get_lock('display_data'):
+            filtered_data = filter_func(self._data)
+            self._shown_data = self._header_manager.sort(filtered_data)
+            self._display_data()
 
     @utils.widget_error_signal
     def _update_data(self, row: int, col: int):

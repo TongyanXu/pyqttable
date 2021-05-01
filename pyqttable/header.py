@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from pyqttable.column import *
 from pyqttable.editor import *
 from pyqttable.widget import *
+from pyqttable import utils
 from typing import Dict, NoReturn
 
 
@@ -27,7 +28,7 @@ class NormalHeaderView(QtWidgets.QHeaderView):
         super().mouseReleaseEvent(e)
 
 
-class FilterHeaderView(FilterHeader):
+class FilterHeaderView(FilterHHeaderView):
     sectionRightClicked = QtCore.pyqtSignal(int)
 
     def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> NoReturn:
@@ -84,6 +85,9 @@ class HeaderManager(QtCore.QObject):
 
         self._filter_editor = {}
         self._curr_sorting_on = None
+
+        # Data change lock to distinguish manually change on UI and set_data
+        self._lock = utils.NameLock()
 
         self._setup_ui()
 
@@ -185,15 +189,17 @@ class HeaderManager(QtCore.QObject):
         When editing of filter widgets is done, emit filterTriggered signal to parent QTableWidget,
             with filter function which takes an original DataFrame and returns a filtered DataFrame
         """
-        self.filterTriggered.emit(self._do_filter)
+        if not self._lock.check_lock('update_filter'):
+            self.filterTriggered.emit(self._do_filter)
 
     def update_filter(self, df: pd.DataFrame) -> NoReturn:
-        header = self._parent.horizontalHeader()
-        for j in range(header.count()):
-            item = self._parent.horizontalHeaderItem(j)
-            assert isinstance(item, HeaderViewItem), \
-                'Header item not HeaderViewItem'
-            self._reload_filter_editor(item.column_cfg, df)
+        with self._lock.get_lock('update_filter'):
+            header = self._parent.horizontalHeader()
+            for j in range(header.count()):
+                item = self._parent.horizontalHeaderItem(j)
+                assert isinstance(item, HeaderViewItem), \
+                    'Header item not HeaderViewItem'
+                self._reload_filter_editor(item.column_cfg, df)
 
     # ================================ Sort Part ================================
 
