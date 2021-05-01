@@ -167,6 +167,7 @@ class PyQtTable(QtWidgets.QTableWidget):
                     cell_item = TableCell.from_row(row, col)
                     self.setItem(row_num, j, cell_item)
                 row_num += 1
+            self.setFocus()
 
     @utils.widget_error_signal
     def _sort_action(self, sort_func: callable):
