@@ -167,24 +167,23 @@ class PyQtTable(QtWidgets.QTableWidget):
                     cell_item = TableCell.from_row(row, col)
                     self.setItem(row_num, j, cell_item)
                 row_num += 1
-            self.setFocus()
 
     @utils.widget_error_signal
     def _sort_action(self, sort_func: callable):
-        if not self._lock.get_lock('display_data'):
+        if not self._lock.check_lock('display_data'):
             self._shown_data = sort_func(self._shown_data)
             self._display_data()
 
     @utils.widget_error_signal
     def _filter_action(self, filter_func: callable):
-        if not self._lock.get_lock('display_data'):
+        if not self._lock.check_lock('display_data'):
             filtered_data = filter_func(self._data)
             self._shown_data = self._header_manager.sort(filtered_data)
             self._display_data()
 
     @utils.widget_error_signal
     def _update_data(self, row: int, col: int):
-        if not self._lock.get_lock('display_data'):
+        if not self._lock.check_lock('display_data'):
             item = self.item(row, col)
             assert isinstance(item, TableCell)
             column_cfg = item.column_cfg
